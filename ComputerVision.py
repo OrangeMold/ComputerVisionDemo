@@ -15,8 +15,16 @@ class SafetyApp:
         self.window = window
         self.window.title("SafeShift")
         
-        # Set minimum window size
-        self.window.minsize(640, 480)
+        # Initialize camera and model
+        self.cap = cv2.VideoCapture(0)
+        
+        # Get actual camera resolution
+        self.window_width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.window_height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        
+        # Set window size to match camera resolution
+        self.window.geometry(f"{self.window_width}x{self.window_height}")
+        self.window.minsize(480, 480)
         
         # Initialize camera and model
         self.cap = cv2.VideoCapture(0)
@@ -102,7 +110,7 @@ class SafetyApp:
         
         # Model selection
         ttk.Label(model_frame, text="Select Model:").pack(pady=5)
-        model_combo = ttk.Combobox(model_frame, values=["best.pt", "yolov8n.pt", "yolov8s.pt"])
+        model_combo = ttk.Combobox(model_frame, values=["best.pt", "yolov8n.pt", "yolov8s.pt", "best10epoch.pt"])
         model_combo.pack(pady=5)
         model_combo.set("best.pt")
 
@@ -129,9 +137,12 @@ class SafetyApp:
         ret, frame = self.cap.read()
         if ret:
             if self.detection_active:
-                # Perform detection
-                results = self.model(frame)
-                annotated_frame = results[0].plot()
+                # Perform detection with confidence threshold
+                results = self.model(frame, conf=0.7)  # Set minimum confidence to 70%
+                if len(results[0].boxes) > 0:  # Check if any detections above threshold
+                    annotated_frame = results[0].plot()
+                else:
+                    annotated_frame = frame
             else:
                 # Show raw frame without detection
                 annotated_frame = frame
