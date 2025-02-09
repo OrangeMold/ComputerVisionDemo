@@ -2,7 +2,7 @@ from ultralytics import YOLO
 import cv2
 
 # Load pre-trained model (you can use a custom-trained model if needed)
-model = YOLO("best.pt")  # Default small model, you can train a custom one
+model = YOLO("best10epoch.pt")  # Default small model, you can train a custom one
 
 # Open webcam
 cap = cv2.VideoCapture(0)
