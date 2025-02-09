@@ -1,21 +1,27 @@
-import cv2
 from ultralytics import YOLO
+import cv2
 
-model = YOLO("yolov8n.pt")  # Load model
+# Load pre-trained model (you can use a custom-trained model if needed)
+model = YOLO("yolov8n.pt")  # Default small model, you can train a custom one
 
-# Replace with your iPhone's streaming URL
-url = "http://192.168.1.100:8080/video"
-cap = cv2.VideoCapture(url)
+# Open webcam
+cap = cv2.VideoCapture(0)
 
 while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
         break
 
+    # Perform detection
     results = model(frame)
+
+    # Draw results on frame
     annotated_frame = results[0].plot()
 
+    # Show output
     cv2.imshow("Safety Gear Detection", annotated_frame)
+
+    # Press 'q' to exit
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
