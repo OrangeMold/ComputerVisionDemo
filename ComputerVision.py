@@ -33,7 +33,7 @@ class SafetyApp:
         # Remove the physical button section and keep the detection_active variable
         self.detection_active = False
 
-        fileOptions = ["Restart", "Settings", "Export Report", "Exit"]
+        fileOptions = ["Restart", "Settings", "Export Report"]
         viewOptions = ["Change Camera", "Change Model", "Change Resolution", "Toggle Detection"]  # Added Toggle Detection
         menuBar = Menu(self.window)
         file = Menu(menuBar, tearoff=0)
@@ -45,10 +45,11 @@ class SafetyApp:
         View = Menu(menuBar, tearoff=0)
         # Add commands with specific functions for view menu items
         View.add_command(label="Change Camera", command=self.openSettings)
-        View.add_command(label="Change Model", command=None)
-        View.add_command(label="Change Resolution", command=None)
+        View.add_command(label="Change Model", command=self.openSettings)
+        View.add_command(label="Change Resolution", command=self.openSettings)
         View.add_command(label="Toggle Detection", command=self.toggle_detection)
 
+        file.add_command(label="Settings", command = self.openSettings)
         file.add_command(label="Exit", command=self.window.quit)
 
         menuBar.add_cascade(label="View", menu=View)
@@ -93,7 +94,7 @@ class SafetyApp:
         ttk.Label(camera_frame, text="Resolution:").pack(pady=5)
         resolution_combo = ttk.Combobox(camera_frame, values=["640x480", "1280x720", "1920x1080"])
         resolution_combo.pack(pady=5)
-        resolution_combo.set("1280x720")
+        resolution_combo.set(f"{self.window_width}x{self.window_height}")
         
         # Model settings tab
         model_frame = ttk.Frame(notebook)
@@ -107,7 +108,18 @@ class SafetyApp:
 
         # Save button
         def save_settings():
-            # Add code here to save the settings
+            # Get resolution values
+            width, height = map(int, resolution_combo.get().split('x'))
+            self.window_width = width
+            self.window_height = height
+            
+            # Update window size
+            self.window.geometry(f"{width}x{height}")
+            
+            # Update camera resolution
+            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+            
             settings_window.destroy()
             
         save_button = ttk.Button(settings_window, text="Save", command=save_settings)
